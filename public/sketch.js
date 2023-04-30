@@ -1,21 +1,21 @@
-let intro = document.getElementById('infoContainer');
-let canvasContainer = document.getElementById('canvasContainer');
-let finished = false;
-
 function collaborativeDrawingMode() {
   document.getElementById('infoContainer').style.display = "none";
   document.getElementById('canvasContainer').style.display = "block";
+  socket.emit('newCollaborator', document.getElementById('name').value);
 }
 
-// declaring necessary variables
+// declaring variables
 var socket;
 var video;
 var colorPicker;
 var tSlider;
 var sSlider;
+let canvas;
+let collaborators = [];
+let finished = false;
 
 function setup() {
-  let canvas = createCanvas(windowWidth, windowHeight);
+  canvas = createCanvas(windowWidth, windowHeight);
   canvas.parent('canvasContainer');
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
@@ -52,6 +52,7 @@ function setup() {
   socket = io.connect('http://localhost:3000');
   socket.on('draw', updateDrawing);
   socket.on('end', finishDrawing);
+  socket.on('newCollaborator', updateCollaborators);
 }
 
 // executes same drawing on all connections based on data taken from single connection where 'draw' was made
@@ -59,6 +60,10 @@ function updateDrawing(data) {
   let newColor = color(data.r,data.g,data.b,data.a);
   fill(newColor);
   ellipse(data.x,data.y,data.s,data.s);
+}
+
+function updateCollaborators(name) {
+  collaborators.push(name);
 }
 
 function end() {
@@ -86,7 +91,7 @@ function mouseDragged() {
   // Referenced following answer on Stack Overflow on use of regex to transform color string to array.
   // https://stackoverflow.com/questions/10970958/get-a-color-component-from-an-rgb-string-in-javascript
   // (I initially tried sending a color object as part of the data variable, but it could not be recognized as a color in the updateDrawing() function. Thus I decided to convert color object -> string -> array in order to access the individual rgba values).
-  newColor = newColor.toString()
+  newColor = newColor.toString();
   newColor = newColor.replace(/[^\d,]/g, '').split(',');
 
   var data = {
@@ -96,7 +101,7 @@ function mouseDragged() {
     r: newColor[0],
     g: newColor[1],
     b: newColor[2],
-    a: newColor[3]
+    a: newT
   };
 
   socket.emit('draw', data);
@@ -116,6 +121,14 @@ function draw() {
     sSlider.hide();
     button.hide();
     rect(0,0,width,50);
+    push();
+    textFont('Helvetica');
+    textSize(25);
+    fill(0);
+    let collaboratorsString = collaborators.toString().replaceAll(","," and ");
+    collaboratorsString = collaboratorsString.toUpperCase();
+    text('COLLABORATION BY ' + collaboratorsString,20,30);
+    pop();
   }
 
   else {
@@ -131,7 +144,6 @@ function draw() {
     text('COLOR',20,28);
     text('OPACITY',160,28);
     text('SIZE',340,28);
-    textSize(width / 3);
     pop();
     // image(video, 0, 0, width / 2, width / 2 * 3 / 4);
   }

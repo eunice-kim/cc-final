@@ -26,4 +26,8 @@ function newConnection(socket) {
   socket.on('end', () => {
     socket.broadcast.emit('end');
   });
+
+  socket.on('newCollaborator', (name) => {
+    io.sockets.emit('newCollaborator',name);
+  })
 }
