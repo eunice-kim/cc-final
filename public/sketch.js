@@ -1,9 +1,3 @@
-function collaborativeDrawingMode() {
-  document.getElementById('infoContainer').style.display = "none";
-  document.getElementById('canvasContainer').style.display = "block";
-  socket.emit('newCollaborator', document.getElementById('name').value);
-}
-
 // declaring variables
 var socket;
 var video;
@@ -11,8 +5,36 @@ var colorPicker;
 var tSlider;
 var sSlider;
 let canvas;
+let videoCanv;
 let collaborators = [];
+let name;
 let finished = false;
+let videoMode = false;
+
+function drawingMode() {
+  document.getElementById('infoContainer').style.display = "none";
+  document.getElementById('canvasContainer').style.display = "block";
+  name = document.getElementById('name').value;
+  collaborators.push(name);
+  var data = {
+    name: name,
+    mode: videoMode
+  };
+  socket.emit('newCollaborator', data);
+}
+
+function videoDrawingMode() {
+  videoMode = true;
+  document.getElementById('infoContainer').style.display = "none";
+  document.getElementById('canvasContainer').style.display = "block";
+  name = document.getElementById('name').value;
+  collaborators.push(name);
+  var data = {
+    name: name,
+    mode: videoMode
+  };
+  socket.emit('newCollaborator', data);
+}
 
 function setup() {
   canvas = createCanvas(windowWidth, windowHeight);
@@ -22,6 +44,10 @@ function setup() {
 
   background(0);
   noStroke();
+
+  videoCanv = createGraphics(width,height);
+  drawCanv = createGraphics(width, height);
+  drawCanv.noStroke();
 
   // creating color picker and opacity/size sliders that will give user more control over drawing, adding CSS classes in order to style them
   colorPicker = createColorPicker('#000');
@@ -51,8 +77,10 @@ function setup() {
   // connection to server, defining what function shouold be executed on other connections whenever 'draw' is made
   socket = io.connect('http://localhost:3000');
   socket.on('draw', updateDrawing);
+  socket.on('drawVideo', updateVideoDrawing);
   socket.on('end', finishDrawing);
   socket.on('newCollaborator', updateCollaborators);
+  socket.on('oldCollaborator', updatePastCollaborators);
 }
 
 // executes same drawing on all connections based on data taken from single connection where 'draw' was made
@@ -62,17 +90,37 @@ function updateDrawing(data) {
   ellipse(data.x,data.y,data.s,data.s);
 }
 
-function updateCollaborators(name) {
+function updateVideoDrawing(data) {
+  let newColor = color(data.r,data.g,data.b,data.a);
+  drawCanv.fill(newColor);
+  drawCanv.ellipse(data.x,data.y,data.s,data.s);
+}
+
+function updateCollaborators(data) {
+
+  if (data.mode == videoMode) {
+    var returnData = {
+      id:data.id,
+      name:name
+    }
+    socket.emit('oldCollaborator',returnData);
+    collaborators.push(data.name);
+  }
+}
+
+function updatePastCollaborators(name) {
   collaborators.push(name);
 }
 
 function end() {
   finished = true;
-  socket.emit('end');
+  socket.emit('end', videoMode);
 }
 
-function finishDrawing() {
-  finished = true;
+function finishDrawing(mode) {
+  if (mode == videoMode) {
+    finished = true;
+  }
 }
 
 // user can 'draw' whenver they drag their mouse on canvas
@@ -85,8 +133,15 @@ function mouseDragged() {
   let newT = tSlider.value();
   let newS = map(sSlider.value(),1,10,10,100);
   newColor.setAlpha(newT);
-  fill(newColor);
-  ellipse(mouseX,mouseY,newS,newS);
+
+  if (videoMode) {
+    drawCanv.fill(newColor);
+    drawCanv.ellipse(mouseX,mouseY,newS,newS);
+  }
+  else {
+    fill(newColor);
+    ellipse(mouseX,mouseY,newS,newS);
+  }
 
   // Referenced following answer on Stack Overflow on use of regex to transform color string to array.
   // https://stackoverflow.com/questions/10970958/get-a-color-component-from-an-rgb-string-in-javascript
@@ -104,7 +159,10 @@ function mouseDragged() {
     a: newT
   };
 
-  socket.emit('draw', data);
+  if (videoMode) {
+    socket.emit('drawVideo', data);
+  }
+  else { socket.emit('draw', data); }
   console.log('Sending: ' + mouseX + ', ' + mouseY);
 
   }
@@ -112,6 +170,13 @@ function mouseDragged() {
 }
 
 function draw() {
+
+  if (videoMode) {
+    videoCanv.imageMode(CENTER);
+    videoCanv.image(video, width / 2, height / 2, height * 4 / 3, height);
+    image(videoCanv,0,0);
+    image(drawCanv,0,0);
+  }
 
   if (finished) {
     background(255);
@@ -122,7 +187,7 @@ function draw() {
     button.hide();
     rect(0,0,width,50);
     push();
-    textFont('Helvetica');
+    textFont('Gaegu');
     textSize(25);
     fill(0);
     let collaboratorsString = collaborators.toString().replaceAll(","," and ");
@@ -145,6 +210,5 @@ function draw() {
     text('OPACITY',160,28);
     text('SIZE',340,28);
     pop();
-    // image(video, 0, 0, width / 2, width / 2 * 3 / 4);
   }
 }

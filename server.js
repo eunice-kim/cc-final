@@ -23,11 +23,23 @@ function newConnection(socket) {
       socket.broadcast.emit('draw',data);
     });
 
-  socket.on('end', () => {
-    socket.broadcast.emit('end');
+  socket.on('drawVideo', (data) => {
+      socket.broadcast.emit('drawVideo',data);
+    });
+
+  socket.on('end', (data) => {
+    socket.broadcast.emit('end', data);
   });
 
-  socket.on('newCollaborator', (name) => {
-    io.sockets.emit('newCollaborator',name);
+  socket.on('newCollaborator', (data) => {
+    socket.broadcast.emit('newCollaborator',{
+      name: data.name,
+      mode: data.mode,
+      id: socket.id
+    });
+  });
+
+  socket.on('oldCollaborator', (data) => {
+    io.to(data.id).emit('oldCollaborator',data.name);
   })
 }
