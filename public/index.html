@@ -7,7 +7,19 @@
     <meta charset="utf-8" />
   </head>
   <body>
-    <div id="canvasContainer"></div>
+    <div id="infoContainer">
+      <div id="username-row">
+        <label for="username">USERNAME</label>
+        <input type="text" id="username" name="username">
+      </div>
+      <button onclick="collaborativeDrawingMode()">COLLABORATIVE DRAWING</button>
+      <button id="video-continue-button">VIDEO DRAWING</button>
+      <div id="camera-access-notice">
+        You must <span id="access-camera-button">enable camera access</span> to use video drawing mode.
+      </div>
+    </div>
+    <div id="canvasContainer">
+    </div>
   </body>
   <script src="/socket.io/socket.io.js"></script>
   <script src="sketch.js"></script>

@@ -1,17 +1,96 @@
+@import url('https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&display=swap');
+
+* {
+  box-sizing:border-box;
+}
+
 html, body {
   padding:0;
   margin:0;
+  font-family:'Gaegu', sans-serif;
+  font-size:2.5vmin;
 }
 
-#canvasContainer {
+#infoContainer {
   width:100vw;
   height:100vh;
-  background-color:pink;
+  position:fixed;
+  top:0;
+  left:0;
+  background-color:#FFF;
   display:flex;
   flex-flow:column nowrap;
   align-items:center;
   justify-content:center;
+  /* display:none; */
 }
+
+  label {
+    padding-right:0.5vmin;
+  }
+
+  input,input:focus {
+    border-radius:0;
+    border:1px solid #000;
+    outline:none;
+    font-family:'Gaegu', sans-serif;
+    font-size:2.5vmin;
+  }
+
+  #username-row {
+    margin-bottom:2vmin;
+  }
+
+  button {
+    width:38vmin;
+    margin-top:1vmin;
+    border:1px solid #FFF;
+    border-radius:0;
+    padding:8px;
+    background-color:#000;
+    color:#FFF;
+    font-family:'Gaegu', sans-serif;
+    font-size:2vmin;
+  }
+
+    button:hover {
+      background-color:#FFF;
+      color:#000;
+      cursor:pointer;
+      border:1px solid #000;
+    }
+
+  #camera-access-notice {
+    width:38vmin;
+    margin-top:2vmin;
+  }
+
+#canvasContainer {
+  width:100vw;
+  height:100vh;
+  position:fixed;
+  top:0;
+  left:0;
+  display:flex;
+  flex-flow:column nowrap;
+  align-items:center;
+  justify-content:center;
+  display:none;
+}
+
+  #done-button {
+    background-color:#FFF;
+    border:1px solid #000;
+    color:#000;
+    cursor:pointer;
+    width:150px;
+  }
+
+  #done-button:hover {
+    border:1px solid #FFF;
+    background-color:#000;
+    color:#FFF;
+  }
 
 canvas {
   position:absolute;
@@ -19,4 +98,37 @@ canvas {
   height:100vh;
   top:0;
   left:0;
+}
+
+.colorPicker, .colorPicker:focus {
+  border:none;
+  outline:none;
+  cursor:pointer;
+}
+
+.slider {
+  width:80px;
+  -webkit-appearance: none;
+}
+
+.slider:focus {
+  outline:none;
+}
+
+.slider::-webkit-slider-runnable-track {
+  -webkit-appearance:none;
+  background:#000000;
+  -webkit-appearance:none;
+  cursor:pointer;
+  height:1px;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance:none;
+  width:15px;
+  height:15px;
+  background:#000000;
+  cursor:pointer;
+  margin-top:-7px;
+  border-radius:50%;
 }

@@ -1,16 +1,15 @@
-let express = require('express');
-let http = require('http');
-let socket = require('socket.io');
+const express = require('express');
+const http = require('http');
+const app = express();
+const socket = require('socket.io');
+const server = http.createServer(app);
 
-let app = express();
 app.use(express.static('public'));
 
 let port = process.env.PORT || 3000;
-let server = http.createServer(app).listen(port, function() {
+server.listen(port, () => {
   console.log("Listening on port " + port + "...");
 });
-
-console.log("Socket server is running...");
 
 let io = socket(server);
 
@@ -19,9 +18,12 @@ io.sockets.on('connection', newConnection);
 function newConnection(socket) {
   console.log('New Connection: ' + socket.id);
 
-  socket.on('draw',
-    function(data) {
-      socket.broadcast.emit('draw', data);
-    }
-  );
+  // server-side code for 'draw'
+  socket.on('draw', (data) => {
+      socket.broadcast.emit('draw',data);
+    });
+
+  socket.on('end', () => {
+    socket.broadcast.emit('end');
+  });
 }

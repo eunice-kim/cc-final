@@ -1,39 +1,138 @@
+let intro = document.getElementById('infoContainer');
+let canvasContainer = document.getElementById('canvasContainer');
+let finished = false;
+
+function collaborativeDrawingMode() {
+  document.getElementById('infoContainer').style.display = "none";
+  document.getElementById('canvasContainer').style.display = "block";
+}
+
+// declaring necessary variables
 var socket;
 var video;
+var colorPicker;
+var tSlider;
+var sSlider;
 
 function setup() {
   let canvas = createCanvas(windowWidth, windowHeight);
   canvas.parent('canvasContainer');
   canvas.width = canvas.offsetWidth;
   canvas.height = canvas.offsetHeight;
+
   background(0);
   noStroke();
+
+  // creating color picker and opacity/size sliders that will give user more control over drawing, adding CSS classes in order to style them
+  colorPicker = createColorPicker('#000');
+  colorPicker.position(75,10);
+  colorPicker.addClass("colorPicker");
+  colorPicker.parent('canvasContainer');
+  tSlider = createSlider(0, 255, 255);
+  tSlider.position(220, 20);
+  tSlider.addClass("slider");
+  tSlider.parent("canvasContainer");
+  sSlider = createSlider(1, 10, 5);
+  sSlider.position(375, 20);
+  sSlider.addClass("slider");
+  sSlider.parent("canvasContainer");
+
+  // creating button for when drawing is unfinished
+  button = createButton('DONE DRAWING');
+  button.position(25, height - 60);
+  button.id('done-button');
+  button.parent("canvasContainer");
+  button.mousePressed(end);
+
+  // creating webcam video and hiding it
   video = createCapture(VIDEO);
   video.hide();
 
+  // connection to server, defining what function shouold be executed on other connections whenever 'draw' is made
   socket = io.connect('http://localhost:3000');
   socket.on('draw', updateDrawing);
+  socket.on('end', finishDrawing);
 }
 
+// executes same drawing on all connections based on data taken from single connection where 'draw' was made
 function updateDrawing(data) {
-  fill(255,0,100);
-  ellipse(data.x,data.y,30,30);
+  let newColor = color(data.r,data.g,data.b,data.a);
+  fill(newColor);
+  ellipse(data.x,data.y,data.s,data.s);
 }
 
-function mouseDragged() {
-  fill(255);
-  ellipse(mouseX,mouseY,30,30);
+function end() {
+  finished = true;
+  socket.emit('end');
+}
 
-  console.log('Sending: ' + mouseX + ', ' + mouseY);
+function finishDrawing() {
+  finished = true;
+}
+
+// user can 'draw' whenver they drag their mouse on canvas
+function mouseDragged() {
+
+  if (!finished) {
+
+  // color & opacity of drawing can be determined by user
+  let newColor = colorPicker.color();
+  let newT = tSlider.value();
+  let newS = map(sSlider.value(),1,10,10,100);
+  newColor.setAlpha(newT);
+  fill(newColor);
+  ellipse(mouseX,mouseY,newS,newS);
+
+  // Referenced following answer on Stack Overflow on use of regex to transform color string to array.
+  // https://stackoverflow.com/questions/10970958/get-a-color-component-from-an-rgb-string-in-javascript
+  // (I initially tried sending a color object as part of the data variable, but it could not be recognized as a color in the updateDrawing() function. Thus I decided to convert color object -> string -> array in order to access the individual rgba values).
+  newColor = newColor.toString()
+  newColor = newColor.replace(/[^\d,]/g, '').split(',');
 
   var data = {
     x: mouseX,
-    y: mouseY
-  }
+    y: mouseY,
+    s: newS,
+    r: newColor[0],
+    g: newColor[1],
+    b: newColor[2],
+    a: newColor[3]
+  };
 
   socket.emit('draw', data);
+  console.log('Sending: ' + mouseX + ', ' + mouseY);
+
+  }
+
 }
 
 function draw() {
-  image(video, 0, 0, width / 2, width / 2 * 3 / 4);
+
+  if (finished) {
+    background(255);
+    fill(255);
+    colorPicker.hide();
+    tSlider.hide();
+    sSlider.hide();
+    button.hide();
+    rect(0,0,width,50);
+  }
+
+  else {
+    // creation of header and footer so controls / buttons are visible
+    fill(255);
+    rect(0,0,width,50);
+    rect(0,height - 75,width,75);
+
+    // creation of labels for color picker and opacity slider
+    push();
+    textFont('Helvetica');
+    fill(0);
+    text('COLOR',20,28);
+    text('OPACITY',160,28);
+    text('SIZE',340,28);
+    textSize(width / 3);
+    pop();
+    // image(video, 0, 0, width / 2, width / 2 * 3 / 4);
+  }
 }
