@@ -15,6 +15,7 @@ function drawingMode() {
   document.getElementById('infoContainer').style.display = "none";
   document.getElementById('canvasContainer').style.display = "block";
   name = document.getElementById('name').value;
+  collaborators.length = 0;
   collaborators.push(name);
   var data = {
     name: name,
@@ -28,6 +29,7 @@ function videoDrawingMode() {
   document.getElementById('infoContainer').style.display = "none";
   document.getElementById('canvasContainer').style.display = "block";
   name = document.getElementById('name').value;
+  collaborators.length = 0;
   collaborators.push(name);
   var data = {
     name: name,
@@ -106,10 +108,20 @@ function updateCollaborators(data) {
     socket.emit('oldCollaborator',returnData);
     collaborators.push(data.name);
   }
+  console.log('collaborators updated.')
+  for (let i = 0; i < collaborators.length; i++) {
+    console.log(collaborators[i] + ", ");
+  }
 }
 
 function updatePastCollaborators(name) {
-  collaborators.push(name);
+  if (name != null) {
+    collaborators.push(name);
+  }
+  console.log('past collaborators updated.')
+  for (let i = 0; i < collaborators.length; i++) {
+    console.log(collaborators[i] + ", ");
+  }
 }
 
 function end() {
