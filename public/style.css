@@ -17,13 +17,16 @@ html, body {
   position:fixed;
   top:0;
   left:0;
-  background-color:#FFF;
   display:flex;
   flex-flow:column nowrap;
   align-items:center;
   justify-content:center;
-  /* display:none; */
 }
+
+  #title {
+    font-size:5vmin;
+    margin-bottom:2vmin;
+  }
 
   label {
     padding-right:0.5vmin;
@@ -60,10 +63,26 @@ html, body {
       border:1px solid #000;
     }
 
-  #camera-access-notice {
-    width:38vmin;
-    margin-top:2vmin;
-  }
+#descriptionContainer {
+  background-color:#FFF;
+  z-index:-1;
+  width:100vw;
+  height:100vh;
+  position:fixed;
+  top:0;
+  left:0;
+  display:flex;
+  flex-flow:column nowrap;
+  align-items:center;
+}
+
+#canvas-drawing-description, #video-drawing-description {
+  position:absolute;
+  width:42vmin;
+  text-align:center;
+  margin-top:65vh;
+  display:none;
+}
 
 #canvasContainer {
   width:100vw;

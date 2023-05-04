@@ -8,18 +8,23 @@
   </head>
   <body>
     <div id="infoContainer">
+      <div id="title">DRAW TOGETHER</div>
       <div id="username-row">
         <label for="username">NAME</label>
         <input type="text" id="name" name="name">
       </div>
-      <button onclick="drawingMode()">CANVAS DRAWING</button>
-      <button onclick="videoDrawingMode()">VIDEO DRAWING</button>
-      <div id="camera-access-notice">
-        You must <span id="access-camera-button">enable camera access</span> to use video drawing mode.
+      <button onclick="drawingMode()" onmouseover="showCanvasDescription()" onmouseout="hideCanvasDescription()">CANVAS DRAWING</button>
+      <button onclick="videoDrawingMode()" onmouseover="showVideoDescription()" onmouseout="hideVideoDescription()">VIDEO DRAWING</button>
+    </div>
+    <div id="descriptionContainer">
+      <div id="canvas-drawing-description">
+        Draw on a single canvas with other people!
+      </div>
+      <div id="video-drawing-description">
+        Draw on your own webcam as others do the same! You must enable camera access for this mode.
       </div>
     </div>
-    <div id="canvasContainer">
-    </div>
+    <div id="canvasContainer"></div>
   </body>
   <script src="/socket.io/socket.io.js"></script>
   <script src="sketch.js"></script>

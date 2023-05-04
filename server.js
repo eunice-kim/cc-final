@@ -18,7 +18,8 @@ io.sockets.on('connection', newConnection);
 function newConnection(socket) {
   console.log('New Connection: ' + socket.id);
 
-  // server-side code for 'draw'
+  // Following is server-side code for messages sent between sockets.
+
   socket.on('draw', (data) => {
       socket.broadcast.emit('draw',data);
     });
@@ -31,6 +32,7 @@ function newConnection(socket) {
     socket.broadcast.emit('end', data);
   });
 
+  // User's name is sent to all past connections so that collaborator list can be updated. Connection ID is also sent so that names of past collaborators can be received.
   socket.on('newCollaborator', (data) => {
     socket.broadcast.emit('newCollaborator',{
       name: data.name,
@@ -39,6 +41,7 @@ function newConnection(socket) {
     });
   });
 
+  // Message is only sent to single connection whose ID was sent when connection joined.
   socket.on('oldCollaborator', (data) => {
     io.to(data.id).emit('oldCollaborator',data.name);
   })
